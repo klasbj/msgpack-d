@@ -604,13 +604,15 @@ struct PackerImpl(Stream) if (isOutputRange!(Stream, ubyte) && isOutputRange!(St
     ref PackerImpl pack(T)(in T value) if (isFloatingPoint!T && !is(Unqual!T == enum))
     {
         static if (is(Unqual!T == float)) {
-            const temp = convertEndianTo!32(_f(value).i);
+            const v = _f(value);
+            const temp = convertEndianTo!32(v.i);
 
             store_[0] = Format.FLOAT;
             *cast(uint*)&store_[Offset] = temp;
             stream_.put(store_[0..Offset + uint.sizeof]);
         } else static if (is(Unqual!T == double)) {
-            const temp = convertEndianTo!64(_d(value).i);
+            const v = _d(value);
+            const temp = convertEndianTo!64(v.i);
 
             store_[0] = Format.DOUBLE;
             *cast(ulong*)&store_[Offset] = temp;
@@ -1364,11 +1366,13 @@ unittest
 
             switch (I) {
             case 0:
-                const answer = convertEndianTo!32(_f(cast(T)ftests[I].value).i);
+                const v = _f(cast(T)ftests[I].value);
+                const answer = convertEndianTo!32(v.i);
                 assert(memcmp(&packer.stream.data[1], &answer, float.sizeof) == 0);
                 break;
             case 1:
-                const answer = convertEndianTo!64(_d(cast(T)ftests[I].value).i);
+                const v = _d(cast(T)ftests[I].value);
+                const answer = convertEndianTo!64(v.i);
                 assert(memcmp(&packer.stream.data[1], &answer, double.sizeof) == 0);
                 break;
             default:
@@ -1382,7 +1386,8 @@ unittest
                 }
                 else
                 {
-                    const answer = convertEndianTo!64(_d(cast(T)ftests[I].value).i);
+                    const v = _d(cast(T)ftests[I].value);
+                    const answer = convertEndianTo!64(v.i);
                     assert(memcmp(&packer.stream.data[1], &answer, double.sizeof) == 0);
                 }
             }
@@ -1425,7 +1430,8 @@ unittest
                 assert(memcmp(&packer.stream.data[1], &answer, long.sizeof) == 0);
                 break;
             default:
-                const answer = convertEndianTo!64(_d(*ptests[I].p2).i);
+                const v = _d(*ptests[I].p2);
+                const answer = convertEndianTo!64(v.i);
                 assert(memcmp(&packer.stream.data[1], &answer, double.sizeof) == 0);
             }
         }
